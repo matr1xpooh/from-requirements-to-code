@@ -8,7 +8,7 @@ import an.story.domain_model.AcceptanceCriterion;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Acceptance Criteria Parsing")
-class AcceptanceCriteriaTests extends JiraStoryParserTest{
+public class AcceptanceCriteriaTests extends JiraStoryParserTest{
     
     @Test
     @DisplayName("Should parse Gherkin scenario with Given/When/Then")

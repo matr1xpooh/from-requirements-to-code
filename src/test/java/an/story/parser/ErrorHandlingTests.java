@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Error Handling")
-class ErrorHandlingTests extends JiraStoryParserTest{
+public class ErrorHandlingTests extends JiraStoryParserTest{
     
     @Test
     @DisplayName("Should throw exception for null input")

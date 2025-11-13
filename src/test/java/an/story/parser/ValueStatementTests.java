@@ -9,7 +9,7 @@ import an.story.domain_model.ValueStatement;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Value Statement Parsing")
-class ValueStatementTests extends JiraStoryParserTest {
+public class ValueStatementTests extends JiraStoryParserTest {
     
     @Test
     @DisplayName("Should parse valid value statement")
