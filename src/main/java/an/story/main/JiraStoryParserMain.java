@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 // Example Usage and Test
 
-public class Main {
+public class JiraStoryParserMain {
     public static void main(String[] args) {
         JiraStoryParser parser = new JiraStoryParser();
 
