@@ -30,7 +30,7 @@ public class TestGeneratorMain {
         JiraStory story = parser.parse(storyText);
         
         GherkinTestGenerator generator = new GherkinTestGenerator();
-        TestPackage testPackage = generator.generateCompleteTestPackage(story, "an.story.integration-tests");
+        TestPackage testPackage = generator.generateCompleteTestPackage(story, "an.story.integration_tests");
         
         System.out.println("=== FEATURE FILE ===");
         System.out.println(testPackage.getFeatureFile());

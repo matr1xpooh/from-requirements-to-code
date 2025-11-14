@@ -17,7 +17,7 @@ public class Event {
     }
     
     public String getEventType() { return eventType; }
-    public Map<String, Object> getData() { return data; }
+    public Map<String, Object> getData() { return Collections.unmodifiableMap(data); }
     public long getTimestamp() { return timestamp; }
     
     @SuppressWarnings("unchecked")

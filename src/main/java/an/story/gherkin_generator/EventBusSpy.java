@@ -9,8 +9,8 @@ import an.story.gherkin_generator.model.Event;
  * Spy for capturing events from the event bus
  */
 public class EventBusSpy {
-    private Map<String, BlockingQueue<Event>> eventQueues = new ConcurrentHashMap<>();
-    private Map<String, List<Event>> capturedEvents = new ConcurrentHashMap<>();
+    private final Map<String, BlockingQueue<Event>> eventQueues = new ConcurrentHashMap<>();
+    private final Map<String, List<Event>> capturedEvents = new ConcurrentHashMap<>();
     
     public void subscribe(String eventType) {
         eventQueues.putIfAbsent(eventType, new LinkedBlockingQueue<>());

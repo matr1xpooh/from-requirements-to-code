@@ -10,7 +10,7 @@ import an.story.gherkin_generator.MultiServiceTestHarness;
  */
 public class TestContext {
     private Map<String, Object> data = new ConcurrentHashMap<>();
-    private MultiServiceTestHarness harness;
+    private volatile MultiServiceTestHarness harness;
     
     public void set(String key, Object value) {
         data.put(key, value);
