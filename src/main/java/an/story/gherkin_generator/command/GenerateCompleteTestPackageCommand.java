@@ -12,14 +12,12 @@ public class GenerateCompleteTestPackageCommand implements Command<TestPackage> 
     
     public GenerateCompleteTestPackageCommand(JiraStory story, String basePackage) {
         this.story = story;
-        // this.basePackage = basePackage;
     }
     
     @Override
     public TestPackage execute() {
         return new TestPackage(
             new GenerateFeatureFileFromStoryCommand(story).execute()
-            //, new GenerateStepDefinitionsCommand(story, basePackage + ".steps").execute()
         );
     }
 }
