@@ -1,0 +1,87 @@
+{
+  "type": "record",
+  "name": "AoaApplicantDataCleansed",
+  "namespace": "an.story.creditcard.events",
+  "doc": "Event containing information about applying to a credit card after data cleansing",
+  "fields": [
+    {
+      "name": "applicationId",
+      "type": "string",
+      "doc": "Unique identifier for the credit card application"
+    },
+    {
+      "name": "applicantName",
+      "type": "string",
+      "doc": "Name of the applicant"
+    },
+    {
+      "name": "email",
+      "type": "string",
+      "doc": "Email address of the applicant"
+    },
+    {
+      "name": "phoneNumber",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Phone number of the applicant"
+    },
+    {
+      "name": "dateOfBirth",
+      "type": "string",
+      "doc": "Date of birth in ISO format (YYYY-MM-DD)"
+    },
+    {
+      "name": "ssn",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Social Security Number (masked or hashed)"
+    },
+    {
+      "name": "address",
+      "type": {
+        "type": "record",
+        "name": "Address",
+        "fields": [
+          {
+            "name": "street",
+            "type": "string"
+          },
+          {
+            "name": "city",
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "type": "string"
+          },
+          {
+            "name": "zipCode",
+            "type": "string"
+          }
+        ]
+      },
+      "doc": "Address of the applicant"
+    },
+    {
+      "name": "annualIncome",
+      "type": ["null", "double"],
+      "default": null,
+      "doc": "Annual income of the applicant"
+    },
+    {
+      "name": "cleansedTimestamp",
+      "type": "long",
+      "doc": "Timestamp when data cleansing was completed (epoch milliseconds)"
+    },
+    {
+      "name": "cleansingStatus",
+      "type": {
+        "type": "enum",
+        "name": "CleansingStatus",
+        "symbols": ["SUCCESS", "PARTIAL", "FAILED"]
+      },
+      "doc": "Status of the data cleansing process"
+    }
+  ]
+}
+

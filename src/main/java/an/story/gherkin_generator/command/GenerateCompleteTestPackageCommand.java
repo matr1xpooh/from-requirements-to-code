@@ -8,7 +8,6 @@ import an.story.gherkin_generator.model.TestPackage;
  */
 public class GenerateCompleteTestPackageCommand implements Command<TestPackage> {
     private final JiraStory story;
-    // private final String basePackage;
     
     public GenerateCompleteTestPackageCommand(JiraStory story, String basePackage) {
         this.story = story;
