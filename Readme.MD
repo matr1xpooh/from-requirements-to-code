@@ -26,7 +26,7 @@ The simplest way to exercise the parser is via the bundled demo:
 
 ```bash
 mvn exec:java \
-  -Dexec.mainClass="an.story.main.Main" \
+  -Dexec.mainClass="an.story.main.JiraStoryParserMain" \
   -Dexec.classpathScope=compile
 ```
 

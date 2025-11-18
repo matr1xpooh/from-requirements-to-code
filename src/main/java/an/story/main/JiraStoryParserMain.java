@@ -6,8 +6,7 @@ import an.story.domain_model.Requirement;
 import an.story.domain_model.AcceptanceCriterion;
 import an.story.domain_model.ServiceTopology;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 // Example Usage and Test
@@ -17,12 +16,15 @@ public class JiraStoryParserMain {
         JiraStoryParser parser = new JiraStoryParser();
 
         try {
-            Path storyPath = Path.of("sample-jira.story");
-            if (!Files.exists(storyPath)) {
-                throw new IllegalArgumentException("Story file not found: " + storyPath.toAbsolutePath());
+            InputStream resourceStream = JiraStoryParserMain.class.getResourceAsStream("/sample-jira.story");
+            if (resourceStream == null) {
+                throw new IllegalArgumentException("Story file not found on the classpath: /sample-jira.story");
             }
 
-            String storyText = Files.readString(storyPath, StandardCharsets.UTF_8);
+            String storyText;
+            try (resourceStream) {
+                storyText = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
+            }
             JiraStory story = parser.parse(storyText);
             
             System.out.println("=== Parsed Story ===");

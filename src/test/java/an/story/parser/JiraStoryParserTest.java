@@ -4,9 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 
 @DisplayName("Jira Story Parser Tests")
 public class JiraStoryParserTest{
@@ -17,11 +16,14 @@ public class JiraStoryParserTest{
 
     @BeforeAll
     static void loadCompleteStory() throws IOException {
-        Path storyPath = Path.of("sample-jira.story");
-        if (!Files.exists(storyPath)) {
-            throw new IllegalArgumentException("Story file not found: " + storyPath.toAbsolutePath());
+        InputStream resourceStream = JiraStoryParserTest.class.getResourceAsStream("/sample-jira.story");
+        if (resourceStream == null) {
+            throw new IllegalArgumentException("Story file not found on the classpath: /sample-jira.story");
         }
-        completeStoryText = Files.readString(storyPath, StandardCharsets.UTF_8);
+
+        try (resourceStream) {
+            completeStoryText = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
     
     @BeforeEach
