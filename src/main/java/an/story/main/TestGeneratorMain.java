@@ -2,8 +2,13 @@ package an.story.main;
 
 import an.story.domain_model.JiraStory;
 import an.story.gherkin_generator.GherkinTestGenerator;
-import an.story.gherkin_generator.model.TestPackage;
 import an.story.parser.JiraStoryParser;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Example usage of the Gherkin test generator
@@ -26,17 +31,26 @@ public class TestGeneratorMain {
             "Then the \"aoaApplicantDataCleansed\" event is produced\n" +
             "{panel}";
         
-        JiraStoryParser parser = new JiraStoryParser();
-        JiraStory story = parser.parse(storyText);
-        
-        GherkinTestGenerator generator = new GherkinTestGenerator();
-        TestPackage testPackage = generator.generateCompleteTestPackage(story, "an.story.integration_tests");
-        
-        System.out.println("=== FEATURE FILE ===");
-        System.out.println(testPackage.getFeatureFile());
-        
-        System.out.println("\n=== STEP DEFINITIONS ===");
-        System.out.println(testPackage.getStepDefinitions());
+        try {
+            JiraStoryParser parser = new JiraStoryParser();
+            JiraStory story = parser.parse(storyText);
+            
+            GherkinTestGenerator generator = new GherkinTestGenerator();
+            String featureFileContent = generator.generateFeatureFileFromStory(story);
+            
+            // Create output directory
+            Path outputDir = Paths.get("target/generated-tests");
+            Files.createDirectories(outputDir);
+            
+            // Write feature file
+            Path featureFile = outputDir.resolve("generated.feature");
+            Files.writeString(featureFile, featureFileContent, StandardCharsets.UTF_8);
+            System.out.println("Feature file written to: " + featureFile.toAbsolutePath());
+            
+        } catch (IOException e) {
+            System.err.println("Error generating test files: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
 

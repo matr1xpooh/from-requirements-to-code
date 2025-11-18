@@ -8,18 +8,18 @@ import an.story.gherkin_generator.model.TestPackage;
  */
 public class GenerateCompleteTestPackageCommand implements Command<TestPackage> {
     private final JiraStory story;
-    private final String basePackage;
+    // private final String basePackage;
     
     public GenerateCompleteTestPackageCommand(JiraStory story, String basePackage) {
         this.story = story;
-        this.basePackage = basePackage;
+        // this.basePackage = basePackage;
     }
     
     @Override
     public TestPackage execute() {
         return new TestPackage(
-            new GenerateFeatureFileFromStoryCommand(story).execute(),
-            new GenerateStepDefinitionsCommand(story, basePackage + ".steps").execute()
+            new GenerateFeatureFileFromStoryCommand(story).execute()
+            //, new GenerateStepDefinitionsCommand(story, basePackage + ".steps").execute()
         );
     }
 }
