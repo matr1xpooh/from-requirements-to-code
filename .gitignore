@@ -55,5 +55,4 @@ buildNumber.properties
 ehthumbs.db
 Thumbs.db
 
-anthropic-api-key.txt
-src/anthropic-api-key.txt
+**/anthropic-api-key.txt
