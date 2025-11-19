@@ -15,5 +15,3 @@ Given the applicant's age is less than or equal to 120 years
 When the application is processed by the Data Cleanse service
 Then the "aoaApplicantDataCleansed" event is produced
 {panel}
-
-
