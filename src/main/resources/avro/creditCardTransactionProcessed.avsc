@@ -1,0 +1,88 @@
+{
+  "type": "record",
+  "name": "CreditCardTransactionProcessed",
+  "namespace": "an.story.creditcard.events",
+  "doc": "Event published when a credit card transaction has been successfully processed",
+  "fields": [
+    {
+      "name": "transactionId",
+      "type": "string",
+      "doc": "Unique identifier for the transaction"
+    },
+    {
+      "name": "cardNumber",
+      "type": "string",
+      "doc": "Masked credit card number (last 4 digits visible)"
+    },
+    {
+      "name": "cardHolderName",
+      "type": "string",
+      "doc": "Name of the card holder"
+    },
+    {
+      "name": "amount",
+      "type": "double",
+      "doc": "Transaction amount in USD"
+    },
+    {
+      "name": "currency",
+      "type": "string",
+      "default": "USD",
+      "doc": "Currency code (ISO 4217)"
+    },
+    {
+      "name": "merchantId",
+      "type": "string",
+      "doc": "Identifier of the merchant"
+    },
+    {
+      "name": "merchantName",
+      "type": "string",
+      "doc": "Name of the merchant"
+    },
+    {
+      "name": "transactionType",
+      "type": {
+        "type": "enum",
+        "name": "TransactionType",
+        "symbols": ["PURCHASE", "REFUND", "AUTHORIZATION", "VOID"]
+      },
+      "doc": "Type of transaction"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "TransactionStatus",
+        "symbols": ["APPROVED", "DECLINED", "PENDING", "ERROR"]
+      },
+      "doc": "Status of the transaction processing"
+    },
+    {
+      "name": "authorizationCode",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Authorization code from the payment processor"
+    },
+    {
+      "name": "declineReason",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Reason for decline if transaction was declined"
+    },
+    {
+      "name": "processedTimestamp",
+      "type": "long",
+      "doc": "Timestamp when the transaction was processed (epoch milliseconds)"
+    },
+    {
+      "name": "metadata",
+      "type": {
+        "type": "map",
+        "values": "string"
+      },
+      "default": {},
+      "doc": "Additional metadata about the transaction"
+    }
+  ]
+}
