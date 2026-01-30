@@ -1,0 +1,299 @@
+@startuml Codebase Sequence Diagrams
+
+title From Requirements to Code - System Sequence Diagrams
+
+skinparam ParticipantPadding 10
+skinparam BoxPadding 10
+skinparam sequenceMessageAlign center
+
+' ==========================================
+' FLOW 1: Jira Story Parsing & Test Generation
+' ==========================================
+
+== Flow 1: Jira Story Parsing & Test Generation ==
+
+participant "TestGeneratorMain" as TGM
+participant "JiraStoryParser" as JSP
+participant "GherkinTestGenerator" as GTG
+participant "GenerateFeatureFileFromStoryCommand" as GFFSC
+participant "GenerateFeatureNameCommand" as GFNC
+participant "GenerateBackgroundCommand" as GBC
+participant "GenerateScenarioCommand" as GSC
+participant "FileSystem" as FS
+
+TGM -> JSP : parse(storyText)
+activate JSP
+JSP -> JSP : extractPanels(storyText)
+JSP -> JSP : parseValueStatement(panelContent)
+JSP -> JSP : parseRequirements(panelContent)
+JSP -> JSP : parseAcceptanceCriteria(panelContent)
+JSP --> TGM : JiraStory
+deactivate JSP
+
+TGM -> GTG : generateFeatureFileFromStory(story)
+activate GTG
+GTG -> GFFSC : execute()
+activate GFFSC
+
+GFFSC -> GFNC : execute()
+activate GFNC
+GFNC --> GFFSC : "Feature: <name>"
+deactivate GFNC
+
+GFFSC -> JSP : extractTopology(story)
+activate JSP
+JSP --> GFFSC : ServiceTopology
+deactivate JSP
+
+GFFSC -> GBC : execute(topology)
+activate GBC
+GBC --> GFFSC : "Background: ..."
+deactivate GBC
+
+loop for each AcceptanceCriterion
+    GFFSC -> GSC : execute(criterion)
+    activate GSC
+    GSC --> GFFSC : "Scenario: ..."
+    deactivate GSC
+end
+
+GFFSC --> GTG : featureFileContent
+deactivate GFFSC
+
+GTG --> TGM : featureFileContent
+deactivate GTG
+
+TGM -> FS : write to target/generated-tests/
+
+' ==========================================
+' FLOW 2: Step Definitions Generation
+' ==========================================
+
+newpage
+
+== Flow 2: Step Definitions Generation ==
+
+participant "GherkinTestGenerator" as GTG2
+participant "GenerateStepDefinitionsCommand" as GSDC
+participant "CollectUniqueStepsCommand" as CUSC
+participant "GenerateStepMethodCommand" as GSMC
+participant "DetermineAnnotationCommand" as DAC
+participant "GenerateMethodNameCommand" as GMNC
+
+GTG2 -> GSDC : execute()
+activate GSDC
+
+GSDC -> GSDC : generatePackageDeclaration()
+GSDC -> GSDC : generateImports()
+GSDC -> GSDC : generateClassHeader()
+
+GSDC -> CUSC : execute()
+activate CUSC
+note right: Extract all unique\nGiven/When/Then steps
+CUSC --> GSDC : List<String> uniqueSteps
+deactivate CUSC
+
+loop for each step
+    GSDC -> GSMC : execute(step)
+    activate GSMC
+
+    GSMC -> DAC : execute(step)
+    activate DAC
+    DAC --> GSMC : @Given/@When/@Then
+    deactivate DAC
+
+    GSMC -> GMNC : execute(step)
+    activate GMNC
+    GMNC --> GSMC : methodName
+    deactivate GMNC
+
+    GSMC --> GSDC : stepMethodCode
+    deactivate GSMC
+end
+
+GSDC --> GTG2 : stepDefinitionsClass
+deactivate GSDC
+
+' ==========================================
+' FLOW 3: Credit Card Data Cleansing & Kafka Event Publishing
+' ==========================================
+
+newpage
+
+== Flow 3: Credit Card Data Cleansing & Kafka Event Publishing ==
+
+participant "CreditCardApplicationMain" as CCAM
+participant "DataCleanseService" as DCS
+participant "KafkaConfig" as KC
+participant "KafkaProducer" as KP
+participant "Kafka Broker" as KB
+
+CCAM -> CCAM : create ApplicantData\nwith Address
+CCAM -> DCS : new DataCleanseService()
+activate DCS
+DCS -> KC : createProducerProperties()
+KC --> DCS : Properties
+DCS -> KP : new KafkaProducer(props)
+deactivate DCS
+
+CCAM -> DCS : cleanseAndSendEvent(applicantData)
+activate DCS
+
+DCS -> DCS : cleanseData(applicantData)
+note right
+    - Normalize name (trim, spacing)
+    - Lowercase email
+    - Remove non-numeric from phone
+    - Mask SSN (XXX-XX-1234)
+    - Normalize address
+end note
+DCS --> DCS : cleansedApplicantData
+
+DCS -> DCS : createAvroEvent(cleansedData)
+note right: Uses reflection to create\nAoaApplicantDataCleansed\nAvro object
+DCS --> DCS : avroEvent
+
+DCS -> KP : send(ProducerRecord)
+activate KP
+KP -> KB : publish to\n"aoa-applicant-data-cleansed"
+KB --> KP : ack
+KP --> DCS : RecordMetadata (async callback)
+deactivate KP
+
+DCS --> CCAM : true (success)
+deactivate DCS
+
+' ==========================================
+' FLOW 4: Credit Card Event Consumption
+' ==========================================
+
+newpage
+
+== Flow 4: Credit Card Event Consumption ==
+
+participant "CreditCardApplicationMain" as CCAM2
+participant "ApplicantDataCleansedConsumer" as ADCC
+participant "KafkaConfig" as KC2
+participant "KafkaConsumer" as KCC
+participant "Kafka Broker" as KB2
+
+CCAM2 -> ADCC : new ApplicantDataCleansedConsumer(groupId)
+activate ADCC
+ADCC -> KC2 : createConsumerProperties(groupId)
+KC2 --> ADCC : Properties
+ADCC -> KCC : new KafkaConsumer(props)
+ADCC -> KCC : subscribe("aoa-applicant-data-cleansed")
+deactivate ADCC
+
+CCAM2 -> ADCC : start()
+activate ADCC
+
+loop while running
+    ADCC -> KCC : poll(Duration.ofMillis(100))
+    activate KCC
+    KCC -> KB2 : fetch records
+    KB2 --> KCC : ConsumerRecords
+    KCC --> ADCC : ConsumerRecords
+    deactivate KCC
+
+    loop for each record
+        ADCC -> ADCC : processEvent(record)
+        ADCC -> ADCC : processAvroEvent(avroEvent)
+        note right: Uses reflection to\nextract Avro fields
+    end
+end
+
+CCAM2 -> ADCC : stop()
+ADCC -> KCC : close()
+deactivate ADCC
+
+' ==========================================
+' FLOW 5: Test Execution with Test Harness
+' ==========================================
+
+newpage
+
+== Flow 5: Test Execution with Test Harness ==
+
+participant "Cucumber Runner" as CR
+participant "StepDefinitions" as SD
+participant "MultiServiceTestHarness" as MSTH
+participant "ServiceClient" as SC
+participant "EventBusSpy" as EBS
+participant "TestContext" as TC
+
+== Setup Phase ==
+
+CR -> SD : @Before setUp()
+activate SD
+SD -> MSTH : new MultiServiceTestHarness()
+SD -> MSTH : setup()
+activate MSTH
+
+loop for each service in topology
+    MSTH -> SC : new ServiceClient(serviceName)
+    MSTH -> MSTH : serviceClients.put(name, client)
+end
+
+loop for each event in topology
+    MSTH -> EBS : subscribe(eventType)
+end
+
+MSTH --> SD : ready
+deactivate MSTH
+
+SD -> TC : setHarness(harness)
+deactivate SD
+
+== Test Execution Phase ==
+
+CR -> SD : @Given step
+activate SD
+SD -> TC : getHarness()
+SD -> MSTH : getService(serviceName)
+activate MSTH
+MSTH --> SD : ServiceClient
+deactivate MSTH
+SD -> SC : invokeAPI(request)
+SC --> SD : response
+deactivate SD
+
+CR -> SD : @When step
+activate SD
+SD -> SC : performAction(data)
+SC --> SD : result
+deactivate SD
+
+CR -> SD : @Then step
+activate SD
+SD -> MSTH : waitForEvent(eventType, timeout)
+activate MSTH
+MSTH -> EBS : waitForEvent(eventType, timeout)
+activate EBS
+EBS --> MSTH : Event
+deactivate EBS
+MSTH --> SD : Event
+deactivate MSTH
+
+SD -> MSTH : verifyEventNotPublished(eventType)
+activate MSTH
+MSTH -> EBS : hasEvent(eventType)
+EBS --> MSTH : false
+MSTH --> SD : verified
+deactivate MSTH
+deactivate SD
+
+== Teardown Phase ==
+
+CR -> SD : @After tearDown()
+activate SD
+SD -> TC : getHarness()
+SD -> MSTH : teardown()
+activate MSTH
+MSTH -> SC : close()
+MSTH -> EBS : close()
+MSTH --> SD : done
+deactivate MSTH
+deactivate SD
+
+@enduml
