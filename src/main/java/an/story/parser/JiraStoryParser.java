@@ -23,6 +23,13 @@ public class JiraStoryParser {
         Pattern.DOTALL
     );
 
+    private static final Pattern VALUE_STATEMENT_PATTERN = Pattern.compile(
+        "As a\\s+([^,]+),\\s*I want(?:\\s+to)?\\s+(.+?),\\s*so that\\s+(.+)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+    );
+
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("^(\\d+)\\.\\s*(.*)");
+
     /**
      * Parse a complete Jira story
      */
@@ -76,12 +83,7 @@ public class JiraStoryParser {
      * Parse the value statement (As a... I want... so that...)
      */
     private ValueStatement parseValueStatement(String content) {
-        Pattern pattern = Pattern.compile(
-            "As a\\s+([^,]+),\\s*I want(?:\\s+to)?\\s+(.+?),\\s*so that\\s+(.+)",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-        );
-        
-        Matcher matcher = pattern.matcher(content);
+        Matcher matcher = VALUE_STATEMENT_PATTERN.matcher(content);
         if (matcher.find()) {
             String persona = matcher.group(1).trim();
             String goal = matcher.group(2).trim();
@@ -109,8 +111,7 @@ public class JiraStoryParser {
             if (line.isEmpty()) continue;
             
             // Check if this line starts with a number
-            Pattern numberPattern = Pattern.compile("^(\\d+)\\.\\s*(.*)");
-            Matcher matcher = numberPattern.matcher(line);
+            Matcher matcher = NUMBER_PATTERN.matcher(line);
             
             if (matcher.find()) {
                 // Save previous requirement if exists
@@ -185,23 +186,30 @@ public class JiraStoryParser {
     }
 
     /**
-     * Extract service topology from parsed story
+     * Extract service topology from parsed story (static utility method)
      */
-    public ServiceTopology extractTopology(JiraStory story) {
+    public static ServiceTopology extractTopologyStatic(JiraStory story) {
         Set<String> services = new HashSet<>();
         Set<String> events = new HashSet<>();
         Set<String> schemas = new HashSet<>();
-        
+
         for (Requirement req : story.getRequirements()) {
             services.addAll(req.getServices());
             events.addAll(req.getEvents());
             schemas.addAll(req.getSchemas());
         }
-        
+
         return new ServiceTopology(
             new ArrayList<>(services),
             new ArrayList<>(events),
             new ArrayList<>(schemas)
         );
+    }
+
+    /**
+     * Extract service topology from parsed story
+     */
+    public ServiceTopology extractTopology(JiraStory story) {
+        return extractTopologyStatic(story);
     }
 }

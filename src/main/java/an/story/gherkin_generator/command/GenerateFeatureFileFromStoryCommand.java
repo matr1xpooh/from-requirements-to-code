@@ -24,7 +24,7 @@ public class GenerateFeatureFileFromStoryCommand implements Command<String> {
         feature.append("  ").append(story.getValueStatement().toString()).append("\n\n");
         
         // Background section if needed
-        ServiceTopology topology = new JiraStoryParser().extractTopology(story);
+        ServiceTopology topology = JiraStoryParser.extractTopologyStatic(story);
         if (!topology.getServices().isEmpty()) {
             feature.append(new GenerateBackgroundCommand(topology).execute());
         }

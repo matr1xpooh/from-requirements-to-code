@@ -48,7 +48,7 @@ public class GenerateStepDefinitionsCommand implements Command<String> {
         steps.append("    }\n\n");
         
         // Setup hook
-        ServiceTopology topology = new JiraStoryParser().extractTopology(story);
+        ServiceTopology topology = JiraStoryParser.extractTopologyStatic(story);
         steps.append("    @Before\n");
         steps.append("    public void setUp() throws Exception {\n");
         if (topology.getServices().isEmpty()) {

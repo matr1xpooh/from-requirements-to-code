@@ -9,6 +9,15 @@ import java.util.regex.Matcher;
  * Represents a single requirement with extracted service/event information
  */
 public class Requirement {
+    private static final Pattern SERVICE_PATTERN = Pattern.compile(
+        "\"([^\"]+)\"\\s+service",
+        Pattern.CASE_INSENSITIVE
+    );
+
+    private static final Pattern EVENT_PATTERN = Pattern.compile("\"(\\w+)\"\\s+event");
+
+    private static final Pattern SCHEMA_PATTERN = Pattern.compile("\"(\\w+)\"\\s+event");
+
     private int number;
     private String text;
     private List<String> services;
@@ -25,8 +34,7 @@ public class Requirement {
 
     private List<String> extractServices(String text) {
         List<String> services = new ArrayList<>();
-        Pattern pattern = Pattern.compile("\"([^\"]+)\"\\s+service", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = SERVICE_PATTERN.matcher(text);
         while (matcher.find()) {
             services.add(matcher.group(1));
         }
@@ -35,8 +43,7 @@ public class Requirement {
 
     private List<String> extractEvents(String text) {
         List<String> events = new ArrayList<>();
-        Pattern pattern = Pattern.compile("\"(\\w+)\"\\s+event");
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = EVENT_PATTERN.matcher(text);
         while (matcher.find()) {
             events.add(matcher.group(1));
         }
@@ -46,8 +53,7 @@ public class Requirement {
     private List<String> extractSchemas(String text) {
         List<String> schemas = new ArrayList<>();
         if (text.toLowerCase().contains("avro schema")) {
-            Pattern pattern = Pattern.compile("\"(\\w+)\"\\s+event");
-            Matcher matcher = pattern.matcher(text);
+            Matcher matcher = SCHEMA_PATTERN.matcher(text);
             while (matcher.find()) {
                 schemas.add(matcher.group(1) + ".avsc");
             }
