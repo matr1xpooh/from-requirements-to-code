@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "jira-story-parser",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["exec:java", "-Dexec.mainClass=an.story.main.JiraStoryParserMain"],
+      "port": 0
+    },
+    {
+      "name": "test-generator",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["exec:java", "-Dexec.mainClass=an.story.main.TestGeneratorMain"],
+      "port": 0
+    },
+    {
+      "name": "creditcard-producer",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["exec:java", "-Dexec.mainClass=an.story.creditcard.main.ProducerMain"],
+      "port": 9092
+    },
+    {
+      "name": "creditcard-consumer",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["exec:java", "-Dexec.mainClass=an.story.creditcard.main.ConsumerMain"],
+      "port": 9092
+    },
+    {
+      "name": "creditcard-app",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["exec:java", "-Dexec.mainClass=an.story.creditcard.main.CreditCardApplicationMain"],
+      "port": 9092
+    }
+  ]
+}

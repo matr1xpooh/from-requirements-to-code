@@ -101,42 +101,43 @@ public class DataCleanseService {
             Object builder = avroClass.getMethod("newBuilder").invoke(null);
             
             // Set fields using builder pattern
-            builder.getClass().getMethod("setApplicationId", String.class).invoke(builder, data.getApplicationId());
-            builder.getClass().getMethod("setApplicantName", String.class).invoke(builder, data.getApplicantName());
-            builder.getClass().getMethod("setEmail", String.class).invoke(builder, data.getEmail());
-            
+            // Avro-generated setters use CharSequence (not String) and primitive long for timestamps
+            builder.getClass().getMethod("setApplicationId", CharSequence.class).invoke(builder, data.getApplicationId());
+            builder.getClass().getMethod("setApplicantName", CharSequence.class).invoke(builder, data.getApplicantName());
+            builder.getClass().getMethod("setEmail", CharSequence.class).invoke(builder, data.getEmail());
+
             if (data.getPhoneNumber() != null) {
-                builder.getClass().getMethod("setPhoneNumber", String.class).invoke(builder, data.getPhoneNumber());
+                builder.getClass().getMethod("setPhoneNumber", CharSequence.class).invoke(builder, data.getPhoneNumber());
             }
-            
-            builder.getClass().getMethod("setDateOfBirth", String.class)
+
+            builder.getClass().getMethod("setDateOfBirth", CharSequence.class)
                 .invoke(builder, data.getDateOfBirth().format(DateTimeFormatter.ISO_LOCAL_DATE));
-            
+
             if (data.getSsn() != null) {
-                builder.getClass().getMethod("setSsn", String.class).invoke(builder, data.getSsn());
+                builder.getClass().getMethod("setSsn", CharSequence.class).invoke(builder, data.getSsn());
             }
-            
+
             // Create address Avro object
             if (data.getAddress() != null) {
                 Class<?> addressClass = Class.forName("an.story.creditcard.events.Address");
                 Object addressBuilder = addressClass.getMethod("newBuilder").invoke(null);
-                addressBuilder.getClass().getMethod("setStreet", String.class)
+                addressBuilder.getClass().getMethod("setStreet", CharSequence.class)
                     .invoke(addressBuilder, data.getAddress().getStreet());
-                addressBuilder.getClass().getMethod("setCity", String.class)
+                addressBuilder.getClass().getMethod("setCity", CharSequence.class)
                     .invoke(addressBuilder, data.getAddress().getCity());
-                addressBuilder.getClass().getMethod("setState", String.class)
+                addressBuilder.getClass().getMethod("setState", CharSequence.class)
                     .invoke(addressBuilder, data.getAddress().getState());
-                addressBuilder.getClass().getMethod("setZipCode", String.class)
+                addressBuilder.getClass().getMethod("setZipCode", CharSequence.class)
                     .invoke(addressBuilder, data.getAddress().getZipCode());
                 Object address = addressBuilder.getClass().getMethod("build").invoke(addressBuilder);
                 builder.getClass().getMethod("setAddress", addressClass).invoke(builder, address);
             }
-            
+
             if (data.getAnnualIncome() != null) {
                 builder.getClass().getMethod("setAnnualIncome", Double.class).invoke(builder, data.getAnnualIncome());
             }
-            
-            builder.getClass().getMethod("setCleansedTimestamp", Long.class)
+
+            builder.getClass().getMethod("setCleansedTimestamp", long.class)
                 .invoke(builder, System.currentTimeMillis());
             
             // Set cleansing status
