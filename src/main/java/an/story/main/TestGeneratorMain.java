@@ -4,6 +4,9 @@ import an.story.domain_model.JiraStory;
 import an.story.gherkin_generator.GherkinTestGenerator;
 import an.story.parser.JiraStoryParser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +17,8 @@ import java.nio.charset.StandardCharsets;
  * Example usage of the Gherkin test generator
  */
 public class TestGeneratorMain {
+    private static final Logger log = LoggerFactory.getLogger(TestGeneratorMain.class);
+
     public static void main(String[] args) {
         String storyText = "{panel:title=Value Statement | titleBGColor=#b9d9ed}\n" +
             "As a Chase Bank product owner, I want to ensure that users over age of 120 are not allowed to apply for a credit card, so that we\n" +
@@ -30,27 +35,25 @@ public class TestGeneratorMain {
             "When the application is processed by the Data Cleanse service\n" +
             "Then the \"aoaApplicantDataCleansed\" event is produced\n" +
             "{panel}";
-        
+
         try {
             JiraStoryParser parser = new JiraStoryParser();
             JiraStory story = parser.parse(storyText);
-            
+
             GherkinTestGenerator generator = new GherkinTestGenerator();
             String featureFileContent = generator.generateFeatureFileFromStory(story);
-            
+
             // Create output directory
             Path outputDir = Paths.get("target/generated-tests");
             Files.createDirectories(outputDir);
-            
+
             // Write feature file
             Path featureFile = outputDir.resolve("generated.feature");
             Files.writeString(featureFile, featureFileContent, StandardCharsets.UTF_8);
-            System.out.println("Feature file written to: " + featureFile.toAbsolutePath());
-            
+            log.info("Feature file written to: {}", featureFile.toAbsolutePath());
+
         } catch (IOException e) {
-            System.err.println("Error generating test files: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error generating test files: {}", e.getMessage(), e);
         }
     }
 }
-

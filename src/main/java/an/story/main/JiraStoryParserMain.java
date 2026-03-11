@@ -6,12 +6,17 @@ import an.story.domain_model.Requirement;
 import an.story.domain_model.AcceptanceCriterion;
 import an.story.domain_model.ServiceTopology;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 // Example Usage and Test
 
 public class JiraStoryParserMain {
+    private static final Logger log = LoggerFactory.getLogger(JiraStoryParserMain.class);
+
     public static void main(String[] args) {
         JiraStoryParser parser = new JiraStoryParser();
 
@@ -26,34 +31,33 @@ public class JiraStoryParserMain {
                 storyText = new String(resourceStream.readAllBytes(), StandardCharsets.UTF_8);
             }
             JiraStory story = parser.parse(storyText);
-            
-            System.out.println("=== Parsed Story ===");
-            System.out.println("\nValue Statement:");
-            System.out.println(story.getValueStatement());
-            
-            System.out.println("\nRequirements:");
+
+            log.info("=== Parsed Story ===");
+            log.info("\nValue Statement:");
+            log.info("{}", story.getValueStatement());
+
+            log.info("\nRequirements:");
             for (Requirement req : story.getRequirements()) {
-                System.out.println(req);
-                System.out.println("  Services: " + req.getServices());
-                System.out.println("  Events: " + req.getEvents());
-                System.out.println("  Schemas: " + req.getSchemas());
+                log.info("{}", req);
+                log.info("  Services: {}", req.getServices());
+                log.info("  Events: {}", req.getEvents());
+                log.info("  Schemas: {}", req.getSchemas());
             }
-            
-            System.out.println("\nAcceptance Criteria:");
+
+            log.info("\nAcceptance Criteria:");
             for (AcceptanceCriterion ac : story.getAcceptanceCriteria()) {
-                System.out.println(ac);
-                System.out.println("  Given: " + ac.getGivenStatements());
-                System.out.println("  When: " + ac.getWhenStatements());
-                System.out.println("  Then: " + ac.getThenStatements());
+                log.info("{}", ac);
+                log.info("  Given: {}", ac.getGivenStatements());
+                log.info("  When: {}", ac.getWhenStatements());
+                log.info("  Then: {}", ac.getThenStatements());
             }
-            
-            System.out.println("\n=== Service Topology ===");
+
+            log.info("\n=== Service Topology ===");
             ServiceTopology topology = parser.extractTopology(story);
-            System.out.println(topology);
-            
+            log.info("{}", topology);
+
         } catch (Exception e) {
-            System.err.println("Error parsing story: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error parsing story: {}", e.getMessage(), e);
         }
     }
 }
